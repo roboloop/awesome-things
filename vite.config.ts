@@ -1,3 +1,4 @@
+import { fileURLToPath, URL } from 'node:url'
 import path from 'path'
 import { PreRenderedChunk } from 'rollup'
 import { defineConfig } from 'vite'
@@ -5,7 +6,10 @@ import { defineConfig } from 'vite'
 export default defineConfig({
   build: {
     lib: {
-      entry: path.resolve(__dirname, 'src/index.ts'),
+      entry: {
+        index: path.resolve(__dirname, 'src/index.ts'),
+        extra: path.resolve(__dirname, 'src/extra.ts'),
+      },
       formats: ['cjs'],
     },
     rollupOptions: {

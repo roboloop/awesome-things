@@ -3,7 +3,15 @@
   "private": true,
   "version": "0.0.0",
   "type": "module",
-  "scripts": {},
+  "scripts": {
+    "build": "tsc && vite build && cp appsscript.json dist/",
+    "deploy": "npm run build && clasp push",
+    "test": "vitest run",
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix",
+    "prettier": "prettier . --check",
+    "prettier:fix": "prettier . --write"
+  },
   "devDependencies": {
     "@eslint/js": "^9.22.0",
     "@types/google-apps-script": "^1.0.97",
