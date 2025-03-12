@@ -88,12 +88,12 @@ export function fetchRepository(owner: string, repo: string): Repository {
   }
 }
 
-export function fetchFile(owner: string, repo: string, filepath: string): string {
+export function fetchReadme(owner: string, repo: string): string {
   const options: GoogleAppsScript.URL_Fetch.URLFetchRequestOptions = {
     method: 'get',
     headers: defaultHeaders,
   }
-  const url = `https://${host}/repos/${owner}/${repo}/contents/${filepath}`
+  const url = `https://${host}/repos/${owner}/${repo}/readme`
   const response = UrlFetchApp.fetch(url, options)
   const data = JSON.parse(response.getContentText())
   const bytes = Utilities.base64Decode(data.content)
