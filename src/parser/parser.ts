@@ -32,6 +32,24 @@ function extractRawSection(content: string, section: string): string | null {
 
 const matchThing = /\s\[(?<name>[^\]]+)\]\((?<url>[^)]+)\)\s*-\s*(?<desc>.+)$/
 
+export function extractThings(content: string, section: string): Thing[] {
+  const rawSection = extractRawSection(content, section)
+  if (rawSection === null) {
+    return []
+  }
+
+  return rawSection
+    .trim()
+    .split('\n')
+    .map(l => l.match(matchThing))
+    .filter(m => m != null)
+    .map(m => ({
+      name: m.groups!.name,
+      desc: m.groups!.desc,
+      url: m.groups!.url,
+    }))
+}
+
 export function extractTableOfContents(content: string): TableOfContents[] {
   return content
     .split('\n')
