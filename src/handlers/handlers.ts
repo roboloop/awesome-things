@@ -1,9 +1,11 @@
 import * as github from '@/client/github'
 import * as utils from '@/client/utils'
 import * as parser from '@/parser/parser'
+import * as thing from './thing'
 import * as toc from './toc'
 
 export const mainSheetName = 'ToC'
+export const defaultHeight = 21
 
 function makeOrCleanSheet(
   spreadsheet: GoogleAppsScript.Spreadsheet.Spreadsheet,
@@ -66,6 +68,63 @@ export function loadTopOfContent(
   spreadsheet.setActiveSheet(sheet)
 }
 
+export function loadSection(
+  spreadsheet: GoogleAppsScript.Spreadsheet.Spreadsheet,
+  section: string,
+): void {
+  // Load and insert data
+  const mainSheet = spreadsheet.getSheetByName(mainSheetName)
+  if (!mainSheet) {
+    throw new Error(`${mainSheetName} not found`)
+  }
+  const [url] = getMetaRow(mainSheet)
+  const [owner, repo] = utils.parseOwnerRepo(url)
+  const readme = github.fetchReadme(owner, repo)
+  const things = parser.extractThings(readme, section)
+  if (things.length === 0) {
+    throw new Error("Things not found")
+  }
+
+  const sheet = makeOrCleanSheet(spreadsheet, section)
+  sheet.setColumnWidth(1, <GoogleAppsScript.Integer>defaultHeight)
+  const headers = new thing.ThingBuilder().headers()
+  sheet.getRange(1, 1, 1, headers.length).setValues([headers])
+
+  for (const { name, url, desc } of things) {
+    try {
+      const { repository, lastCommit, lastTag, totalTags, issueStats, pullRequestStats } =
+        github.metaByUrl(url)
+      const line = new thing.ThingBuilder()
+        .setAvatar(repository.avatar)
+        .setName(repository.name)
+        .setHtmlUrl(repository.htmlUrl)
+        .setFullName(repository.fullName)
+        .setDescription(repository.description)
+        .setStars(repository.stars)
+        .setOpenIssuesCount(repository.openIssuesCount)
+        .setLastCommittedAt(lastCommit.commitedAt)
+        .setCreatedAt(repository.createdAt)
+        .setIsFork(repository.isFork)
+        .setIsArchived(repository.isArchived)
+        .setTopics(repository.topics)
+        .setHomepageUrl(repository.homepageUrl)
+        .setLastTag(lastTag.version)
+        .setTotalTags(totalTags)
+        .setTotalIssues(issueStats.totalOpen, issueStats.totalClosed)
+        .setTotalPullRequests(pullRequestStats.totalOpen, pullRequestStats.totalClosed)
+        .build()
+
+      sheet.appendRow(line)
+    } catch (e) {
+      console.error(`${name} error`, e)
+      sheet.appendRow(['', name, url, desc, e])
+    }
+  }
+
+  const range = sheet.getDataRange()
+  range.createFilter()
+  range.applyRowBanding(SpreadsheetApp.BandingTheme.GREEN, false, false)
+}
 
 export function cleanThings(spreadsheet: GoogleAppsScript.Spreadsheet.Spreadsheet): void {
   spreadsheet
