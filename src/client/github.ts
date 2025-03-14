@@ -185,6 +185,10 @@ export function fetchIssueStats(owner: string, repo: string): [IssueStats, Issue
 }
 
 export function metaByUrl(url: string): Metadata {
+  if (!utils.isSupportedUrl(url)) {
+    throw new Error('This is not GitHub repository')
+  }
+
   const [owner, repo] = utils.parseOwnerRepo(url)
   const repository = fetchRepository(owner, repo)
   const lastCommit = fetchCommit(owner, repo, repository.defaultBranch)
