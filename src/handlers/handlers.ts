@@ -60,9 +60,10 @@ export function loadTopOfContent(
   range.applyRowBanding(SpreadsheetApp.BandingTheme.GREEN, false, false)
   sheet.protect().setWarningOnly(true)
 
-  const helper = '1. Choose the cell with the thing\n2. Open the "Awesome Things" menu\n3. Click "Load Thing"'
-    .split('\n')
-    .map(l => [l])
+  const helper =
+    '1. Choose the cell with the thing\n2. Open the "Awesome Things" menu\n3. Click "Load Thing"'
+      .split('\n')
+      .map(l => [l])
   sheet.getRange(2, sheet.getLastColumn() + 2, helper.length, 1).setValues(helper)
 
   spreadsheet.setActiveSheet(sheet)
@@ -82,7 +83,7 @@ export function loadSection(
   const readme = github.fetchReadme(owner, repo)
   const things = parser.extractThings(readme, section)
   if (things.length === 0) {
-    throw new Error("Things not found")
+    throw new Error('Things not found')
   }
 
   const sheet = makeOrCleanSheet(spreadsheet, section)
