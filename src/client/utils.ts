@@ -1,5 +1,9 @@
 const githubRegex = new RegExp(`github.com/(?<owner>[^/]+)\\/(?<repo>[^/]+)\\/?$`)
 
+export function isSupportedUrl(url: string): boolean {
+  return url.match(githubRegex) !== null
+}
+
 export function parseOwnerRepo(url: string): [string, string] {
   const match = url.match(githubRegex)
   if (match === null) {
