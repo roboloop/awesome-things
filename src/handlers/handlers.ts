@@ -93,8 +93,16 @@ export function loadSection(
 
   for (const { name, url, desc } of things) {
     try {
-      const { repository, lastCommit, lastTag, totalTags, issueStats, pullRequestStats } =
-        github.metaByUrl(url)
+      const {
+        repository,
+        lastCommit,
+        lastTag,
+        totalTags,
+        lastRelease,
+        totalReleases,
+        issueStats,
+        pullRequestStats,
+      } = github.metaByUrl(url)
       const line = new thing.ThingBuilder()
         .setAvatar(repository.avatar)
         .setName(repository.name)
@@ -111,6 +119,8 @@ export function loadSection(
         .setHomepageUrl(repository.homepageUrl)
         .setLastTag(lastTag.version)
         .setTotalTags(totalTags)
+        .setLastRelease(lastRelease.name)
+        .setTotalReleases(totalReleases)
         .setTotalIssues(issueStats.totalOpen, issueStats.totalClosed)
         .setTotalPullRequests(pullRequestStats.totalOpen, pullRequestStats.totalClosed)
         .build()

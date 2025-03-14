@@ -16,6 +16,8 @@ export class ThingBuilder {
   private homepageUrl?: string
   private lastTag?: string
   private totalTags?: number
+  private lastRelease?: string
+  private totalReleases?: number
   private totalOpenIssues?: number
   private totalClosedIssues?: number
   private totalOpenPullRequests?: number
@@ -98,6 +100,18 @@ export class ThingBuilder {
     return this
   }
 
+  setLastRelease(lastRelease?: string): this {
+    this.lastRelease = lastRelease
+
+    return this
+  }
+
+  setTotalReleases(totalReleases: number): this {
+    this.totalReleases = totalReleases
+
+    return this
+  }
+
   setTotalIssues(totalOpen: number, totalClosed: number): this {
     this.totalOpenIssues = totalOpen
     this.totalClosedIssues = totalClosed
@@ -133,6 +147,8 @@ export class ThingBuilder {
           : '',
       lastTag: this.lastTag || '',
       totalTags: typeof this.totalTags === 'number' ? this.totalTags : '',
+      lastRelease: this.lastRelease || '',
+      totalReleases: typeof this.totalReleases === 'number' ? this.totalReleases : '',
       lastCommitAt: this.lastCommittedAt ? new Date(this.lastCommittedAt) : '',
       createdAt: this.createdAt ? new Date(this.createdAt) : '',
 

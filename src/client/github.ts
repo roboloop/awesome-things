@@ -30,6 +30,10 @@ export interface Tag {
   version?: string
 }
 
+export interface Release {
+  name?: string
+}
+
 interface IssueStats {
   totalOpen: number
   totalClosed: number
@@ -38,8 +42,12 @@ interface IssueStats {
 export interface Metadata {
   repository: Repository
   lastCommit: Commit
+
   lastTag: Tag
   totalTags: number
+
+  lastRelease: Release
+  totalReleases: number
 
   issueStats: IssueStats
   pullRequestStats: IssueStats
@@ -115,12 +123,13 @@ export function fetchCommit(owner: string, repo: string, ref: string): Commit {
   }
 }
 
-function fetchStats(
+function fetchLastAndTotal(
   owner: string,
   repo: string,
   model: string,
   params: { [key: string]: string },
-): number {
+  // eslint-disable-next-line  @typescript-eslint/no-explicit-any
+): [any, number] {
   const options: GoogleAppsScript.URL_Fetch.URLFetchRequestOptions = {
     method: 'get',
     headers: defaultHeaders,
@@ -138,34 +147,31 @@ function fetchStats(
   const headers = <{ [key: string]: string }>response.getHeaders()
   const links = utils.parseLinkHeader(headers['Link'] ?? '')
   const lastPage = links['last']?.match(/\bpage=(?<page>\d+)/)?.groups!.page
+  const total = lastPage ? parseInt(lastPage) : data.length
 
-  return lastPage ? parseInt(lastPage) : data.length
+  return [data, total]
 }
 
-export function fetchLastTag(owner: string, repo: string): Tag {
-  const options: GoogleAppsScript.URL_Fetch.URLFetchRequestOptions = {
-    method: 'get',
-    headers: defaultHeaders,
-  }
-  const url = `https://${host}/repos/${owner}/${repo}/tags`
-  const query = `per_page=1&page=1`
-  const response = UrlFetchApp.fetch(url + '?' + query, options)
-  const data = JSON.parse(response.getContentText())
+function fetchTotal(
+  owner: string,
+  repo: string,
+  model: string,
+  params: { [key: string]: string },
+): number {
+  const [, total] = fetchLastAndTotal(owner, repo, model, params)
 
-  return {
-    version: data?.[0]?.name,
-  }
+  return total
 }
 
 export function fetchIssueStats(owner: string, repo: string): [IssueStats, IssueStats] {
   const issueStats: IssueStats = {
-    totalOpen: fetchStats(owner, repo, 'issues', { state: 'open' }),
-    totalClosed: fetchStats(owner, repo, 'issues', { state: 'closed' }),
+    totalOpen: fetchTotal(owner, repo, 'issues', { state: 'open' }),
+    totalClosed: fetchTotal(owner, repo, 'issues', { state: 'closed' }),
   }
 
   const pullRequestStats: IssueStats = {
-    totalOpen: fetchStats(owner, repo, 'pulls', { state: 'open' }),
-    totalClosed: fetchStats(owner, repo, 'pulls', { state: 'closed' }),
+    totalOpen: fetchTotal(owner, repo, 'pulls', { state: 'open' }),
+    totalClosed: fetchTotal(owner, repo, 'pulls', { state: 'closed' }),
   }
 
   return [
@@ -182,16 +188,19 @@ export function metaByUrl(url: string): Metadata {
   const [owner, repo] = utils.parseOwnerRepo(url)
   const repository = fetchRepository(owner, repo)
   const lastCommit = fetchCommit(owner, repo, repository.defaultBranch)
-  const lastTag = fetchLastTag(owner, repo)
-  const totalTags = fetchStats(owner, repo, 'tags', {})
+  const [lastTag, totalTags] = fetchLastAndTotal(owner, repo, 'tags', {})
+  const [lastRelease, totalReleases] = fetchLastAndTotal(owner, repo, 'releases', {})
   const [issueStats, pullRequestStats] = fetchIssueStats(owner, repo)
 
   return {
     repository,
     lastCommit,
 
-    lastTag,
+    lastTag: { version: lastTag?.[0]?.name },
     totalTags,
+
+    lastRelease: { name: lastRelease?.[0]?.name },
+    totalReleases,
 
     issueStats,
     pullRequestStats,
