@@ -1,4 +1,5 @@
 dist/
 .clasp.json
+.clasp.json.example
 appsscript.json
-README.md
+appsscript.json.example
