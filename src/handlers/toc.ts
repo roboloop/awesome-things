@@ -1,8 +1,8 @@
 export class ToCBuilder {
-  private things: {name: string, offset: number, total: number}[] = []
+  private things: { name: string; offset: number; total: number }[] = []
 
   addThing(name: string, offset: number, total: number) {
-    this.things.push({name, offset, total})
+    this.things.push({ name, offset, total })
 
     return this
   }
@@ -11,7 +11,7 @@ export class ToCBuilder {
     const columns = Math.max(...this.things.map(({ offset }) => offset)) + 1
     const result: string[][] = []
 
-    const header = new Array(columns - 1).fill('').map((_, i) => `Header ${i+1}`)
+    const header = new Array(columns - 1).fill('').map((_, i) => `Header ${i + 1}`)
     header.push('Total')
     result.push(header)
 
