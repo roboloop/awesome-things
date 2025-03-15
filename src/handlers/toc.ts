@@ -8,6 +8,10 @@ export class ToCBuilder {
   }
 
   build(): string[][] {
+    if (this.things.length === 0) {
+      return []
+    }
+
     const columns = Math.max(...this.things.map(({ offset }) => offset)) + 1
     const result: string[][] = []
 
