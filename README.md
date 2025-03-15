@@ -51,6 +51,7 @@ The project uses data from awesome-\* repositories, like as [awesome-python](htt
    1. Get a PAT [here](https://github.com/settings/personal-access-tokens) (no scopes required)
 
    2. Create a `.env.local`
+
       ```shell
       cp .env .env.local
       ```
