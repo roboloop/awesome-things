@@ -47,12 +47,16 @@ export function loadTopOfContent(
   const readme = github.fetchReadme(owner, repo)
   const tableOfContents = parser.extractTableOfContents(readme)
 
+  const sheet = makeOrCleanSheet(spreadsheet, mainSheetName)
+  putMetaRow(sheet, url)
+
   const builder = new toc.ToCBuilder()
   tableOfContents.forEach(({ name, offset, total }) => builder.addThing(name, offset, total))
   const rows = builder.build()
+  if (rows.length === 0) {
+    return
+  }
 
-  const sheet = makeOrCleanSheet(spreadsheet, mainSheetName)
-  putMetaRow(sheet, url)
   const range = sheet.getRange(sheet.getLastRow() + 1, 1, rows.length, rows[0].length)
 
   range.setValues(rows)
