@@ -44,8 +44,8 @@ Per vel "Nobis si Dominium" urna ex dis est-etiam haeres mi maiores hic ille.
 ## Header 1-4
 
 - [lucern-nisl](iusto://merita.non/moliri/sint/enim/ante/personom/missae-typi) - Comilitones Vero Dicta Sint Pretium.
-- [sapien-antistes](dicta://lingua.quo/recordatio/pacifice/amet/numerus/queunt-imbellem) - Gallicismum aut NecessilATE directe.
-- [specie-zelabant-sint](animi://aptent.quo/classica-wisi/orator-gloriose-nisi) - Obligatorio Quod Partibus + Wisi Futurum.
+- [sapien-antistes](dicta://lingua.quo/recordatio/pacifice/amet/numerus/queunt-imbellem) – Gallicismum aut NecessilATE directe.
+- [specie-zelabant-sint](animi://aptent.quo/classica-wisi/orator-gloriose-nisi) — Obligatorio Quod Partibus + Wisi Futurum.
 
 ### Header 1-4-1
 

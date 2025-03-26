@@ -30,7 +30,7 @@ function extractRawSection(content: string, section: string): string | null {
   return content.slice(startIndex, endIndex).trim()
 }
 
-const matchThing = /\s\[(?<name>[^\]]+)\]\((?<url>[^)]+)\)\s*-\s*(?<desc>.+)$/
+const matchThing = /\s\[(?<name>[^\]]+)\]\((?<url>[^)]+)\)\s*[-–—]\s*(?<desc>.+)$/
 
 export function extractThings(content: string, section: string): Thing[] {
   const rawSection = extractRawSection(content, section)
