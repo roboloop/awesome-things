@@ -95,8 +95,12 @@ export function loadSection(
   const headers = new thing.ThingBuilder().headers()
   sheet.getRange(1, 1, 1, headers.length).setValues([headers])
 
-  for (const { name, url, desc } of things) {
+  for (const { name, url, desc, additionalUrls } of things) {
     try {
+      const supportedUrl = utils.isSupportedUrl(url)
+        ? url
+        : (additionalUrls.find(u => utils.isSupportedUrl(u)) ?? url)
+
       const {
         repository,
         lastCommit,
@@ -106,7 +110,7 @@ export function loadSection(
         totalReleases,
         issueStats,
         pullRequestStats,
-      } = github.metaByUrl(url)
+      } = github.metaByUrl(supportedUrl)
       const line = new thing.ThingBuilder()
         .setAvatar(repository.avatar)
         .setName(repository.name)

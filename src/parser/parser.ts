@@ -4,6 +4,7 @@ export interface Thing {
   name: string
   desc: string
   url: string
+  additionalUrls: string[]
 }
 
 export interface TableOfContents {
@@ -30,6 +31,16 @@ function extractRawSection(content: string, section: string): string | null {
   return content.slice(startIndex, endIndex).trim()
 }
 
+const matchAdditionalUrls = /\[[^\]]+\]\((?<url>[^)]+)\)/g
+
+function extractAdditionalUrls(desc: string): string[] {
+  const urls = []
+  for (const match of desc.matchAll(matchAdditionalUrls)) {
+    urls.push(match.groups!.url)
+  }
+  return urls
+}
+
 const matchThing = /\s\[(?<name>[^\]]+)\]\((?<url>[^)]+)\)\s*[-–—]\s*(?<desc>.+)$/
 
 export function extractThings(content: string, section: string): Thing[] {
@@ -47,6 +58,7 @@ export function extractThings(content: string, section: string): Thing[] {
       name: m.groups!.name,
       desc: m.groups!.desc,
       url: m.groups!.url,
+      additionalUrls: extractAdditionalUrls(m.groups!.desc),
     }))
 }
 

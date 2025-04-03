@@ -27,7 +27,7 @@ jobs:
         run: npm run lint
 
       - name: Run Prettier Check
-        run: npm run prettier
+        run: npm run format
 
   test:
     name: Run Tests
