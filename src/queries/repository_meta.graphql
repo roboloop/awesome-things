@@ -1,0 +1,78 @@
+query RepositoryMeta($owner: String!, $name: String!) {
+  repository(owner: $owner, name: $name) {
+    # General repo info
+    name
+    nameWithOwner
+    description
+    isFork
+    isArchived
+    stargazerCount
+    homepageUrl
+    url
+    updatedAt
+    createdAt
+
+    owner {
+      avatarUrl
+    }
+
+    # Topics
+    repositoryTopics(first: 20) {
+      nodes {
+        topic {
+          name
+        }
+      }
+    }
+
+    # Pull requests
+    closed_pull_requests: pullRequests(states: [CLOSED, MERGED]) {
+      totalCount
+    }
+    open_pull_requests: pullRequests(states: OPEN) {
+      totalCount
+    }
+
+    # Issues
+    closed_issues: issues(states: CLOSED) {
+      totalCount
+    }
+    open_issues: issues(states: OPEN) {
+      totalCount
+    }
+
+    # Tags
+    tags: refs(refPrefix: "refs/tags/") {
+      totalCount
+    }
+    latestTag: refs(
+      refPrefix: "refs/tags/"
+      first: 1
+      orderBy: { field: TAG_COMMIT_DATE, direction: DESC }
+    ) {
+      edges {
+        node {
+          name
+        }
+      }
+    }
+
+    # Releases
+    releases {
+      totalCount
+    }
+    latestRelease {
+      name
+    }
+
+    # Last commit on default branch
+    defaultBranchRef {
+      name
+      target {
+        ... on Commit {
+          committedDate
+        }
+      }
+    }
+  }
+}

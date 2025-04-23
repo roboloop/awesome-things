@@ -118,7 +118,6 @@ export function loadSection(
         .setFullName(repository.fullName)
         .setDescription(repository.description)
         .setStars(repository.stars)
-        .setOpenIssuesCount(repository.openIssuesCount)
         .setLastCommittedAt(lastCommit.commitedAt)
         .setCreatedAt(repository.createdAt)
         .setIsFork(repository.isFork)

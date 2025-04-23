@@ -1,7 +1,8 @@
+import { RepositoryMetaQuery, RepositoryMetaQueryVariables } from '../generated/types'
+import query from '../queries/repository_meta.graphql'
 import * as utils from './utils'
 
 export interface Repository {
-  id: number
   avatar: string
   name: string
   fullName: string
@@ -10,7 +11,6 @@ export interface Repository {
   topics: string[]
 
   stars: number
-  openIssuesCount: number
 
   isFork: boolean
   isArchived: boolean
@@ -60,42 +60,6 @@ const defaultHeaders = {
   'X-GitHub-Api-Version': '2022-11-28',
 }
 
-export function fetchRepository(owner: string, repo: string): Repository {
-  const options: GoogleAppsScript.URL_Fetch.URLFetchRequestOptions = {
-    method: 'get',
-    headers: defaultHeaders,
-  }
-  try {
-    const url = `https://${host}/repos/${owner}/${repo}`
-    const response = UrlFetchApp.fetch(url, options)
-    const data = JSON.parse(response.getContentText())
-    return {
-      id: data.id,
-      avatar: data.owner.avatar_url,
-      name: data.name,
-      fullName: data.full_name,
-      description: data.description,
-      defaultBranch: data.default_branch,
-      topics: data.topics,
-
-      stars: data.stargazers_count,
-      openIssuesCount: data.open_issues_count,
-
-      isFork: data.fork,
-      isArchived: data.archived,
-
-      htmlUrl: data.html_url,
-      homepageUrl: data.homepage,
-
-      updatedAt: data.updated_at,
-      createdAt: data.created_at,
-    }
-  } catch (e) {
-    console.error(`Cannot fetch ${owner}/${repo}`)
-    throw e
-  }
-}
-
 export function fetchReadme(owner: string, repo: string): string {
   const options: GoogleAppsScript.URL_Fetch.URLFetchRequestOptions = {
     method: 'get',
@@ -109,79 +73,71 @@ export function fetchReadme(owner: string, repo: string): string {
   return Utilities.newBlob(bytes).getDataAsString()
 }
 
-export function fetchCommit(owner: string, repo: string, ref: string): Commit {
-  const options: GoogleAppsScript.URL_Fetch.URLFetchRequestOptions = {
-    method: 'get',
-    headers: defaultHeaders,
+function metadataByGraphql(owner: string, name: string): Metadata {
+  const variables: RepositoryMetaQueryVariables = {
+    owner,
+    name,
   }
-  const url = `https://${host}/repos/${owner}/${repo}/commits/${ref}`
+
+  const options: GoogleAppsScript.URL_Fetch.URLFetchRequestOptions = {
+    method: 'post',
+    headers: defaultHeaders,
+    payload: JSON.stringify({ query, variables }),
+  }
+
+  const url = `https://${host}/graphql`
   const response = UrlFetchApp.fetch(url, options)
-  const data = JSON.parse(response.getContentText())
+  const json: { data: RepositoryMetaQuery } = JSON.parse(response.getContentText())
+  const repository = json.data.repository
+  if (repository === null || repository === undefined) {
+    throw new Error('Repository not found')
+  }
 
   return {
-    commitedAt: data.commit.committer.date,
-  }
-}
+    repository: {
+      avatar: repository.owner.avatarUrl,
+      name: repository.name,
+      fullName: repository.nameWithOwner,
+      description: repository.description ?? '',
+      defaultBranch: repository.defaultBranchRef?.name ?? '',
+      topics:
+        repository.repositoryTopics.nodes
+          ?.map(n => n?.topic.name)
+          ?.filter(n => typeof n === 'string') ?? [],
 
-function fetchLastAndTotal(
-  owner: string,
-  repo: string,
-  model: string,
-  params: { [key: string]: string },
-  // eslint-disable-next-line  @typescript-eslint/no-explicit-any
-): [any, number] {
-  const options: GoogleAppsScript.URL_Fetch.URLFetchRequestOptions = {
-    method: 'get',
-    headers: defaultHeaders,
-  }
-  params.per_page = '1'
-  params.page = '1'
+      stars: repository.stargazerCount,
 
-  const query = Object.keys(params)
-    .map(key => encodeURIComponent(key) + '=' + encodeURIComponent(params[key]))
-    .join('&')
-  const url = `https://${host}/repos/${owner}/${repo}/${model}`
-  const response = UrlFetchApp.fetch(url + '?' + query, options)
-  const data = JSON.parse(response.getContentText())
+      isFork: repository.isFork,
+      isArchived: repository.isArchived,
 
-  const headers = <{ [key: string]: string }>response.getHeaders()
-  const links = utils.parseLinkHeader(headers['Link'] ?? '')
-  const lastPage = links['last']?.match(/\bpage=(?<page>\d+)/)?.groups!.page
-  const total = lastPage ? parseInt(lastPage) : data.length
+      htmlUrl: repository.url,
+      homepageUrl: repository.homepageUrl,
 
-  return [data, total]
-}
-
-function fetchTotal(
-  owner: string,
-  repo: string,
-  model: string,
-  params: { [key: string]: string },
-): number {
-  const [, total] = fetchLastAndTotal(owner, repo, model, params)
-
-  return total
-}
-
-export function fetchIssueStats(owner: string, repo: string): [IssueStats, IssueStats] {
-  const issueStats: IssueStats = {
-    totalOpen: fetchTotal(owner, repo, 'issues', { state: 'open' }),
-    totalClosed: fetchTotal(owner, repo, 'issues', { state: 'closed' }),
-  }
-
-  const pullRequestStats: IssueStats = {
-    totalOpen: fetchTotal(owner, repo, 'pulls', { state: 'open' }),
-    totalClosed: fetchTotal(owner, repo, 'pulls', { state: 'closed' }),
-  }
-
-  return [
-    {
-      // Issues are included the number of real issues and the number of PRs
-      totalOpen: issueStats.totalOpen - pullRequestStats.totalOpen,
-      totalClosed: issueStats.totalClosed - pullRequestStats.totalClosed,
+      updatedAt: repository.updatedAt,
+      createdAt: repository.createdAt,
     },
-    pullRequestStats,
-  ]
+    issueStats: {
+      totalOpen: repository.open_issues.totalCount,
+      totalClosed: repository.closed_issues.totalCount,
+    },
+    pullRequestStats: {
+      totalOpen: repository.open_pull_requests.totalCount,
+      totalClosed: repository.closed_pull_requests.totalCount,
+    },
+    lastCommit: {
+      commitedAt:
+        (repository.defaultBranchRef?.target as { __typename: 'Commit'; committedDate: string })
+          ?.committedDate ?? '',
+    },
+    lastRelease: {
+      name: repository.latestRelease?.name ?? '',
+    },
+    lastTag: {
+      version: repository.latestTag?.edges?.[0]?.node?.name,
+    },
+    totalReleases: repository.releases.totalCount,
+    totalTags: repository.tags?.totalCount ?? 0,
+  }
 }
 
 export function metaByUrl(url: string): Metadata {
@@ -190,23 +146,6 @@ export function metaByUrl(url: string): Metadata {
   }
 
   const [owner, repo] = utils.parseOwnerRepo(url)
-  const repository = fetchRepository(owner, repo)
-  const lastCommit = fetchCommit(owner, repo, repository.defaultBranch)
-  const [lastTag, totalTags] = fetchLastAndTotal(owner, repo, 'tags', {})
-  const [lastRelease, totalReleases] = fetchLastAndTotal(owner, repo, 'releases', {})
-  const [issueStats, pullRequestStats] = fetchIssueStats(owner, repo)
 
-  return {
-    repository,
-    lastCommit,
-
-    lastTag: { version: lastTag?.[0]?.name },
-    totalTags,
-
-    lastRelease: { name: lastRelease?.[0]?.name },
-    totalReleases,
-
-    issueStats,
-    pullRequestStats,
-  }
+  return metadataByGraphql(owner, repo)
 }

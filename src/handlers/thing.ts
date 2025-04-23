@@ -7,7 +7,6 @@ export class ThingBuilder {
   private fullName?: string
   private description?: string
   private stars?: number
-  private openIssuesCount?: number
   private lastCommittedAt?: string
   private createdAt?: string
   private isFork?: boolean
@@ -50,11 +49,6 @@ export class ThingBuilder {
 
   setStars(stars: number): this {
     this.stars = stars
-    return this
-  }
-
-  setOpenIssuesCount(count: number): this {
-    this.openIssuesCount = count
     return this
   }
 

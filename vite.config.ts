@@ -1,9 +1,15 @@
 import { fileURLToPath, URL } from 'node:url'
 import path from 'path'
 import { PreRenderedChunk } from 'rollup'
+import { string } from 'rollup-plugin-string'
 import { defineConfig } from 'vite'
 
 export default defineConfig({
+  plugins: [
+    string({
+      include: 'src/**/*.graphql',
+    }),
+  ],
   build: {
     lib: {
       entry: {
