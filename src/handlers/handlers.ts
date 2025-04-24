@@ -110,6 +110,7 @@ export function loadSection(
         totalReleases,
         issueStats,
         pullRequestStats,
+        mentionableUsers,
       } = github.metaByUrl(supportedUrl)
       const line = new thing.ThingBuilder()
         .setAvatar(repository.avatar)
@@ -130,6 +131,7 @@ export function loadSection(
         .setTotalReleases(totalReleases)
         .setTotalIssues(issueStats.totalOpen, issueStats.totalClosed)
         .setTotalPullRequests(pullRequestStats.totalOpen, pullRequestStats.totalClosed)
+        .setMentionableUsers(mentionableUsers)
         .build()
 
       sheet.appendRow(line)

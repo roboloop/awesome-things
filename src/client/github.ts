@@ -51,6 +51,8 @@ export interface Metadata {
 
   issueStats: IssueStats
   pullRequestStats: IssueStats
+
+  mentionableUsers: number
 }
 
 const host = 'api.github.com'
@@ -137,6 +139,7 @@ function metadataByGraphql(owner: string, name: string): Metadata {
     },
     totalReleases: repository.releases.totalCount,
     totalTags: repository.tags?.totalCount ?? 0,
+    mentionableUsers: repository.mentionableUsers.totalCount,
   }
 }
 

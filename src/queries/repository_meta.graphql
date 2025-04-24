@@ -74,5 +74,9 @@ query RepositoryMeta($owner: String!, $name: String!) {
         }
       }
     }
+
+    mentionableUsers {
+      totalCount
+    }
   }
 }

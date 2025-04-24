@@ -21,6 +21,7 @@ export class ThingBuilder {
   private totalClosedIssues?: number
   private totalOpenPullRequests?: number
   private totalClosedPullRequests?: number
+  private totalMentionableUsers?: number
 
   setAvatar(url: string): this {
     this.avatar = url
@@ -120,6 +121,12 @@ export class ThingBuilder {
     return this
   }
 
+  setMentionableUsers(total: number): this {
+    this.totalMentionableUsers = total
+
+    return this
+  }
+
   private doBuild(): object {
     const s = '|'
     return {
@@ -139,6 +146,7 @@ export class ThingBuilder {
         typeof this.totalClosedPullRequests === 'number'
           ? `${this.totalOpenPullRequests}${s}${this.totalClosedPullRequests}${s}${this.totalOpenPullRequests + this.totalClosedPullRequests}`
           : '',
+      mentionedUsers: this.totalMentionableUsers,
       lastTag: this.lastTag || '',
       totalTags: typeof this.totalTags === 'number' ? this.totalTags : '',
       lastRelease: this.lastRelease || '',
