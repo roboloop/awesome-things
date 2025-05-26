@@ -128,6 +128,7 @@ export function loadSection(
         .setLastTag(lastTag.version)
         .setTotalTags(totalTags)
         .setLastRelease(lastRelease.name)
+        .setLastReleaseAt(lastRelease.publishedAt)
         .setTotalReleases(totalReleases)
         .setTotalIssues(issueStats.totalOpen, issueStats.totalClosed)
         .setTotalPullRequests(pullRequestStats.totalOpen, pullRequestStats.totalClosed)

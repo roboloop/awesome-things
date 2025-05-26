@@ -32,6 +32,7 @@ export interface Tag {
 
 export interface Release {
   name?: string
+  publishedAt?: string
 }
 
 interface IssueStats {
@@ -133,6 +134,7 @@ function metadataByGraphql(owner: string, name: string): Metadata {
     },
     lastRelease: {
       name: repository.latestRelease?.name ?? '',
+      publishedAt: repository.latestRelease?.publishedAt ?? '',
     },
     lastTag: {
       version: repository.latestTag?.edges?.[0]?.node?.name,

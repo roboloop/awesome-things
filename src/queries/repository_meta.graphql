@@ -63,6 +63,7 @@ query RepositoryMeta($owner: String!, $name: String!) {
     }
     latestRelease {
       name
+      publishedAt
     }
 
     # Last commit on default branch

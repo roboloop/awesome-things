@@ -16,6 +16,7 @@ export class ThingBuilder {
   private lastTag?: string
   private totalTags?: number
   private lastRelease?: string
+  private lastReleaseAt?: string
   private totalReleases?: number
   private totalOpenIssues?: number
   private totalClosedIssues?: number
@@ -101,6 +102,12 @@ export class ThingBuilder {
     return this
   }
 
+  setLastReleaseAt(lastReleaseAt?: string): this {
+    this.lastReleaseAt = lastReleaseAt
+
+    return this
+  }
+
   setTotalReleases(totalReleases: number): this {
     this.totalReleases = totalReleases
 
@@ -150,6 +157,7 @@ export class ThingBuilder {
       lastTag: this.lastTag || '',
       totalTags: typeof this.totalTags === 'number' ? this.totalTags : '',
       lastRelease: this.lastRelease || '',
+      lastReleaseAt: this.lastReleaseAt ? new Date(this.lastReleaseAt) : '',
       totalReleases: typeof this.totalReleases === 'number' ? this.totalReleases : '',
       lastCommitAt: this.lastCommittedAt ? new Date(this.lastCommittedAt) : '',
       createdAt: this.createdAt ? new Date(this.createdAt) : '',
